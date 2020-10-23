@@ -3,7 +3,6 @@ package topic2
 import (
 	"bufio"
 	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -17,19 +16,6 @@ func HashExample(word string) []byte {
 	hashedWord := h.Sum(nil)
 
 	return hashedWord
-}
-
-//HashString returns hashed string
-func HashString(text string) (string, error) {
-	hash := sha256.New()
-	_, err := hash.Write([]byte(text))
-
-	if err != nil {
-		return "", err
-	}
-
-	hashBytes := hash.Sum(nil)
-	return hex.EncodeToString(hashBytes), nil
 }
 
 //Funkcja cytająca plik
