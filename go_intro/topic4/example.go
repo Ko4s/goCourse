@@ -19,7 +19,7 @@ func changeBoolChanel(c chan bool) {
 	c <- true //im seting c channel for true
 }
 
-func SetChanel(c chan int) {
+func SetChanel(c chan<- int) {
 	for i := 0; i < 10; i++ {
 		c <- i
 	}
@@ -27,7 +27,7 @@ func SetChanel(c chan int) {
 	fmt.Println("Seting done")
 }
 
-func GetChannelValue(c chan int) {
+func GetChannelValue(c <-chan int) {
 
 	for v := range c {
 		//time.Sleep(time.Millisecond)
