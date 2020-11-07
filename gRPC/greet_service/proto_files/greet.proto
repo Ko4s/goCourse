@@ -12,6 +12,16 @@ message GreetResponse {
     string greeting = 1;
 }
 
+message GreetManyRequest {
+  string name = 1;
+  int32 amount = 2; 
+}
+
+message GreetManyResponse {
+  string result = 1;
+}
+
 service GreetService {
     rpc SayHello(GreetRequest) returns (GreetResponse);
+    rpc SayManyHello(GreetManyRequest) returns(stream GreetManyResponse);
 } 

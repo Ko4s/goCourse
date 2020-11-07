@@ -2,7 +2,9 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"github/Ko4s/greet_service/greet"
+	"io"
 	"log"
 
 	"google.golang.org/grpc"
@@ -42,4 +44,33 @@ func (c *Client) SayHello(msg string) string {
 	}
 
 	return res.GetGreeting()
+}
+
+func (c *Client) SayManyHello(name string, amount int32) {
+	req := &greet.GreetManyRequest{
+		Name:   name,
+		Amount: amount,
+	}
+
+	resStream, err := c.service.SayManyHello(context.TODO(), req)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for {
+		res, err := resStream.Recv()
+
+		if err == io.EOF {
+			//ten error dostaniemy gdy streamowanie się zakonczy
+			fmt.Println("Data streaming eneded...")
+			return
+		}
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		fmt.Println(res.GetResult())
+	}
 }

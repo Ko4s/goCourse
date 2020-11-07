@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GreetServiceClient interface {
 	SayHello(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
+	SayManyHello(ctx context.Context, in *GreetManyRequest, opts ...grpc.CallOption) (GreetService_SayManyHelloClient, error)
 }
 
 type greetServiceClient struct {
@@ -37,11 +38,44 @@ func (c *greetServiceClient) SayHello(ctx context.Context, in *GreetRequest, opt
 	return out, nil
 }
 
+func (c *greetServiceClient) SayManyHello(ctx context.Context, in *GreetManyRequest, opts ...grpc.CallOption) (GreetService_SayManyHelloClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_GreetService_serviceDesc.Streams[0], "/greet.GreetService/SayManyHello", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &greetServiceSayManyHelloClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GreetService_SayManyHelloClient interface {
+	Recv() (*GreetManyResponse, error)
+	grpc.ClientStream
+}
+
+type greetServiceSayManyHelloClient struct {
+	grpc.ClientStream
+}
+
+func (x *greetServiceSayManyHelloClient) Recv() (*GreetManyResponse, error) {
+	m := new(GreetManyResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GreetServiceServer is the server API for GreetService service.
 // All implementations must embed UnimplementedGreetServiceServer
 // for forward compatibility
 type GreetServiceServer interface {
 	SayHello(context.Context, *GreetRequest) (*GreetResponse, error)
+	SayManyHello(*GreetManyRequest, GreetService_SayManyHelloServer) error
 	mustEmbedUnimplementedGreetServiceServer()
 }
 
@@ -51,6 +85,9 @@ type UnimplementedGreetServiceServer struct {
 
 func (UnimplementedGreetServiceServer) SayHello(context.Context, *GreetRequest) (*GreetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+}
+func (UnimplementedGreetServiceServer) SayManyHello(*GreetManyRequest, GreetService_SayManyHelloServer) error {
+	return status.Errorf(codes.Unimplemented, "method SayManyHello not implemented")
 }
 func (UnimplementedGreetServiceServer) mustEmbedUnimplementedGreetServiceServer() {}
 
@@ -83,6 +120,27 @@ func _GreetService_SayHello_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GreetService_SayManyHello_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GreetManyRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GreetServiceServer).SayManyHello(m, &greetServiceSayManyHelloServer{stream})
+}
+
+type GreetService_SayManyHelloServer interface {
+	Send(*GreetManyResponse) error
+	grpc.ServerStream
+}
+
+type greetServiceSayManyHelloServer struct {
+	grpc.ServerStream
+}
+
+func (x *greetServiceSayManyHelloServer) Send(m *GreetManyResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _GreetService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "greet.GreetService",
 	HandlerType: (*GreetServiceServer)(nil),
@@ -92,6 +150,12 @@ var _GreetService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _GreetService_SayHello_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SayManyHello",
+			Handler:       _GreetService_SayManyHello_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "proto_files/greet.proto",
 }
