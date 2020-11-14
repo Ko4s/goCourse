@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github/Ko4s/greet_service/greet"
-	"github/Ko4s/greet_service/server/service"
+	"github/Ko4s/calculator_service/calc"
+	"github/Ko4s/calculator_service/server/service"
 	"log"
 	"net"
 
@@ -27,10 +27,10 @@ func main() {
 
 	var opts []grpc.ServerOption //tu tablica/slice jest pusta
 
-	grpcServer := grpc.NewServer(opts...)     //zrobiłem sobie server gRPC
-	greetService := service.NewGreetService() //zrobiłems obie moją implementację servicu, czyli tego structa GreetService z metoda SayHello
+	grpcServer := grpc.NewServer(opts...)   //zrobiłem sobie server gRPC
+	calcService := service.NewCalcService() //zrobiłem sobie moją implementację servicu, czyli tego structa GreetService z metoda SayHello
 
-	greet.RegisterGreetServer(grpcServer, greetService)
+	calc.RegisterCalcServer(grpcServer, calcService)
 
 	fmt.Println("Server up and running...")
 	grpcServer.Serve(lis)

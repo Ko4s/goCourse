@@ -1,6 +1,6 @@
 package main
 
-import "github/Ko4s/greet_service/client/client"
+import "github/Ko4s/calculator_service/client/client"
 
 func main() {
 
@@ -11,7 +11,5 @@ func main() {
 		panic(err)
 	}
 
-	c.SayHello("Piotrek")
-	c.SayHello("Szymon")
-	c.SayHello("Aneta")
+	c.Sum(1, 2)
 }
