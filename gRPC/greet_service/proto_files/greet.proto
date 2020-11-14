@@ -24,4 +24,5 @@ message SayHelloManyTimesResponse {
 service GreetService {
     rpc SayHello(GreetRequest) returns (GreetResponse);
     rpc SayHelloManyTimes(SayHelloManyTimesRequest) returns (stream SayHelloManyTimesResponse);
+    rpc GreetManyUsers(stream GreetRequest) returns (GreetResponse);
 } 
