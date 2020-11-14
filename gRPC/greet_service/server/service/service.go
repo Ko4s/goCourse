@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github/Ko4s/greet_service/greet"
+	"io"
+	"strings"
 	"time"
 )
 
@@ -47,6 +49,34 @@ func (s *GreetService) SayHelloManyTimes(req *greet.SayHelloManyTimesRequest, st
 		}
 
 		time.Sleep(time.Second)
+	}
+	return nil
+}
+
+func (s *GreetService) GreetManyUsers(stream greet.GreetService_GreetManyUsersServer) error {
+
+	var names = []string{}
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		names = append(names, req.GetName())
+	}
+
+	res := &greet.GreetResponse{
+		Greeting: fmt.Sprintf("Hello %v ", strings.Join(names, " ")),
+	}
+
+	fmt.Println(fmt.Sprintf("Hello %v ", strings.Join(names, " ")))
+	if err := stream.SendAndClose(res); err != nil {
+		return err
 	}
 
 	return nil

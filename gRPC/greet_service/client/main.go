@@ -1,10 +1,15 @@
 package main
 
-import "github/Ko4s/greet_service/client/client"
+import (
+	"fmt"
+	"github/Ko4s/greet_service/client/client")
+
 
 func main() {
 	address := "localhost:50051"
 	c := client.NewClient(address)
 
-	c.SayHelloManyTimes("Piotrek", 10)
+	names := []string{"Piotrek", "Szymon", "Aneta", "Olga"}
+	res, _ := c.GreetManyUsers(names)
+	fmt.Println(res)
 }

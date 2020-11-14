@@ -74,3 +74,30 @@ func (c *Client) SayHelloManyTimes(msg string, times int32) {
 		fmt.Println(msg.GetResult() + "\n")
 	}
 }
+
+func (c *Client) GreetManyUsers(names []string) (string, error) {
+	inputStream, err := c.service.GreetManyUsers(context.TODO())
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, name := range names {
+		req := &greet.GreetRequest{
+			Name: name,
+		}
+		err = inputStream.Send(req)
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	res, err := inputStream.CloseAndRecv()
+
+	if err != nil {
+		return "", err
+	}
+
+	return res.GetGreeting(), nil
+}
