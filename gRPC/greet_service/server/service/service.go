@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github/Ko4s/greet_service/greet"
+	"io"
+	"strings"
 	"time"
 )
 
@@ -32,7 +34,7 @@ func (s *GreetService) SayManyHello(req *greet.GreetManyRequest, stream greet.Gr
 	amount := req.GetAmount() //int32 >- int / int32 / int64
 
 	var i int32
-	
+
 	for i = 0; i < amount; i++ {
 
 		res := &greet.GreetManyResponse{
@@ -49,4 +51,37 @@ func (s *GreetService) SayManyHello(req *greet.GreetManyRequest, stream greet.Gr
 	}
 
 	return nil
+}
+
+//GreetManyUsers client streaming method
+func (s *GreetService) GreetManyUsers(stream greet.GreetService_GreetManyUsersServer) error {
+
+	names := []string{}
+
+	for {
+		streamReq, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// if streamReq.GetName() == "Piotrek" {
+		// 	res := &greet.GreetResponse{
+		// 		Greeting: fmt.Sprintf("Die %v", streamReq.GetName()),
+		// 	}
+		// 	return stream.SendAndClose(res)
+		// }
+
+		names = append(names, streamReq.GetName())
+	}
+
+	res := &greet.GreetResponse{
+		Greeting: fmt.Sprintf("Hello %v", strings.Join(names, ", ")),
+	}
+
+	return stream.SendAndClose(res)
 }

@@ -1,6 +1,9 @@
 package main
 
-import "github/Ko4s/greet_service/client/client"
+import (
+	"fmt"
+	"github/Ko4s/greet_service/client/client"
+)
 
 func main() {
 
@@ -8,5 +11,7 @@ func main() {
 
 	c := client.NewClient(address)
 
-	c.SayManyHello("Piotrek", 17)
+	names := []string{"Piotrek", "Szymon", "Aneta", "Olga"}
+	s, _ := c.GreetManyUsers(names)
+	fmt.Println(s)
 }
