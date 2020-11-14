@@ -32,6 +32,7 @@ func (s *GreetService) SayManyHello(req *greet.GreetManyRequest, stream greet.Gr
 	amount := req.GetAmount() //int32 >- int / int32 / int64
 
 	var i int32
+	
 	for i = 0; i < amount; i++ {
 
 		res := &greet.GreetManyResponse{
