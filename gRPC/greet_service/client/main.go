@@ -1,6 +1,9 @@
 package main
 
-import "github/Ko4s/greet_service/client/client"
+import (
+	"fmt"
+	"github/Ko4s/greet_service/client/client"
+)
 
 func main() {
 
@@ -11,7 +14,13 @@ func main() {
 		panic(err)
 	}
 
-	c.SayHello("Piotrek")
-	c.SayHello("Szymon")
-	c.SayHello("Aneta")
+	names := []string{"Piotrek", "Olga", "Aneta", "Szymon"}
+
+	r, err := c.GreetManyUsers(names)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(r)
 }
