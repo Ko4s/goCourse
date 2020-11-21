@@ -6,6 +6,7 @@ import (
 	"github/Ko4s/greet_service/greet"
 	"io"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -98,4 +99,58 @@ func (c *Client) GreetManyUsers(names []string) (string, error) {
 	}
 
 	return res.GetGreeting(), nil
+}
+
+func (c *Client) GreetManyTimes(names []string) ([]string, error) {
+
+	clientStream, err := c.service.GreetManyTimes(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	//1. Potrzebujemy gorutyn
+	//zrobienia chanela
+	waitc := make(chan string)
+
+	go func() {
+		for _, name := range names {
+
+			req := greet.GreetRequest{
+				Name: name,
+			}
+
+			clientStream.Send(&req)
+			time.Sleep(time.Second)
+		}
+		clientStream.CloseSend()
+	}()
+
+	//funkcja do czytania odpiedzi z serwera
+
+	go func() {
+		for {
+			res, err := clientStream.Recv()
+
+			if err == io.EOF {
+				fmt.Println(err)
+				break
+			}
+
+			if err != nil {
+				log.Fatalf("%v", err)
+			}
+			waitc <- res.GetGreeting()
+
+		}
+		close(waitc)
+	}()
+
+	var l = []string{}
+
+	for el := range waitc {
+		l = append(l, el)
+	}
+
+	return l, nil
 }

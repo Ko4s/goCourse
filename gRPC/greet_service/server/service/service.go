@@ -85,3 +85,29 @@ func (s *GreetService) GreetManyUsers(stream greet.GreetService_GreetManyUsersSe
 
 	return stream.SendAndClose(res)
 }
+
+//GreetManyTimes streamming service
+func (s *GreetService) GreetManyTimes(serverStream greet.GreetService_GreetManyTimesServer) error {
+
+	for {
+		req, err := serverStream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		name := req.GetName()
+
+		res := greet.GreetResponse{
+			Greeting: "Hello " + name,
+		}
+
+		serverStream.Send(&res)
+	}
+
+	return nil
+}

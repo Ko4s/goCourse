@@ -12,6 +12,7 @@ func main() {
 	c := client.NewClient(address)
 
 	names := []string{"Piotrek", "Szymon", "Aneta", "Olga"}
-	s, _ := c.GreetManyUsers(names)
-	fmt.Println(s)
+	r, err := c.GreetManyTimes(names)
+	fmt.Println(err)
+	fmt.Println(r)
 }
