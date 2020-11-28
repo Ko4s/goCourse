@@ -9,6 +9,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -26,6 +27,8 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 	greetService := service.NewGreetService(repo)
 	greet.RegisterGreetServiceServer(grpcServer, greetService)
+
+	reflection.Register(grpcServer) //tutaj 
 
 	fmt.Println("Server running ....")
 	grpcServer.Serve(lis)
