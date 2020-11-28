@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CalcClient interface {
 	Sum(ctx context.Context, in *SumRequest, opts ...grpc.CallOption) (*SumResponse, error)
+	SumSequence(ctx context.Context, opts ...grpc.CallOption) (Calc_SumSequenceClient, error)
 }
 
 type calcClient struct {
@@ -37,11 +38,46 @@ func (c *calcClient) Sum(ctx context.Context, in *SumRequest, opts ...grpc.CallO
 	return out, nil
 }
 
+func (c *calcClient) SumSequence(ctx context.Context, opts ...grpc.CallOption) (Calc_SumSequenceClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Calc_serviceDesc.Streams[0], "/calc.Calc/SumSequence", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &calcSumSequenceClient{stream}
+	return x, nil
+}
+
+type Calc_SumSequenceClient interface {
+	Send(*SequenceRequest) error
+	CloseAndRecv() (*SequenceResponse, error)
+	grpc.ClientStream
+}
+
+type calcSumSequenceClient struct {
+	grpc.ClientStream
+}
+
+func (x *calcSumSequenceClient) Send(m *SequenceRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *calcSumSequenceClient) CloseAndRecv() (*SequenceResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(SequenceResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // CalcServer is the server API for Calc service.
 // All implementations must embed UnimplementedCalcServer
 // for forward compatibility
 type CalcServer interface {
 	Sum(context.Context, *SumRequest) (*SumResponse, error)
+	SumSequence(Calc_SumSequenceServer) error
 	mustEmbedUnimplementedCalcServer()
 }
 
@@ -51,6 +87,9 @@ type UnimplementedCalcServer struct {
 
 func (UnimplementedCalcServer) Sum(context.Context, *SumRequest) (*SumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sum not implemented")
+}
+func (UnimplementedCalcServer) SumSequence(Calc_SumSequenceServer) error {
+	return status.Errorf(codes.Unimplemented, "method SumSequence not implemented")
 }
 func (UnimplementedCalcServer) mustEmbedUnimplementedCalcServer() {}
 
@@ -83,6 +122,32 @@ func _Calc_Sum_Handler(srv interface{}, ctx context.Context, dec func(interface{
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Calc_SumSequence_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CalcServer).SumSequence(&calcSumSequenceServer{stream})
+}
+
+type Calc_SumSequenceServer interface {
+	SendAndClose(*SequenceResponse) error
+	Recv() (*SequenceRequest, error)
+	grpc.ServerStream
+}
+
+type calcSumSequenceServer struct {
+	grpc.ServerStream
+}
+
+func (x *calcSumSequenceServer) SendAndClose(m *SequenceResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *calcSumSequenceServer) Recv() (*SequenceRequest, error) {
+	m := new(SequenceRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _Calc_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "calc.Calc",
 	HandlerType: (*CalcServer)(nil),
@@ -92,6 +157,12 @@ var _Calc_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Calc_Sum_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SumSequence",
+			Handler:       _Calc_SumSequence_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "proto_files/calc.proto",
 }

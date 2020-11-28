@@ -44,3 +44,27 @@ func (c *Client) Sum(num1, num2 int32) {
 
 	fmt.Println(res.GetResult())
 }
+
+func (c *Client) SumSequence(numbers []int32) int32 {
+
+	clientStream, err := c.service.SumSequence(context.TODO())
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, el := range numbers {
+		req := calc.SequenceRequest{
+			Number: el,
+		}
+
+		clientStream.Send(&req)
+	}
+
+	res, err := clientStream.CloseAndRecv()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return res.GetResult()
+}

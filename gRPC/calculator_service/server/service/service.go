@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github/Ko4s/calculator_service/calc"
+	"io"
 )
 
 // type GreetService struct {
@@ -48,4 +49,29 @@ func (cs *CalcService) Sum(ctx context.Context, req *calc.SumRequest) (*calc.Sum
 	}
 
 	return &res, nil
+}
+
+func (cs *CalcService) SumSequence(stream calc.Calc_SumSequenceServer) error {
+
+	var sum int32 = 0
+	// Petla nieskonczona
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		sum += req.GetNumber()
+	}
+
+	res := calc.SequenceResponse{
+		Result: sum,
+	}
+
+	return stream.SendAndClose(&res)
 }

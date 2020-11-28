@@ -1,6 +1,9 @@
 package main
 
-import "github/Ko4s/calculator_service/client/client"
+import (
+	"fmt"
+	"github/Ko4s/calculator_service/client/client")
+
 
 func main() {
 
@@ -12,4 +15,5 @@ func main() {
 	}
 
 	c.Sum(1, 2)
+	fmt.Println(c.SumSequence([]int32{1, 7, 8, -9, 10}))
 }
