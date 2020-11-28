@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github/Ko4s/greet_service/greet"
+	"io"
 	"log"
 
 	"google.golang.org/grpc"
@@ -67,4 +68,34 @@ func (c *Client) GreetManyUsers(names []string) (string, error) {
 	}
 
 	return res.GetResult(), nil
+}
+
+func (c *Client) GreetManyTimes(name string, times int32) {
+
+	req := greet.GreetManyTimesRequest{
+		Name:  name,
+		Times: times,
+	}
+
+	stream, err := c.service.GreetManyTimes(context.TODO(), &req)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for {
+		res, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		fmt.Println(res.GetMsg())
+	}
+
+	fmt.Println(stream.CloseSend())
 }

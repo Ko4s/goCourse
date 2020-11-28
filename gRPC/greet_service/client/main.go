@@ -18,6 +18,7 @@ func main() {
 
 	r, err := c.GreetManyUsers(names)
 
+	c.GreetManyTimes("Piotrek", 15)
 	if err != nil {
 		panic(err)
 	}
