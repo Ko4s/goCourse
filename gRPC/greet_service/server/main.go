@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github/Ko4s/greet_service/greet"
+	"github/Ko4s/greet_service/server/repository"
 	"github/Ko4s/greet_service/server/service"
 	"log"
 	"net"
@@ -20,13 +21,12 @@ func main() {
 	}
 
 	var opts []grpc.ServerOption
+	repo := repository.NewRepository()
 
 	grpcServer := grpc.NewServer(opts...)
-	greetService := service.NewGreetService()
+	greetService := service.NewGreetService(repo)
 	greet.RegisterGreetServiceServer(grpcServer, greetService)
 
 	fmt.Println("Server running ....")
 	grpcServer.Serve(lis)
 }
-
-

@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Client struct {
@@ -153,4 +155,33 @@ func (c *Client) GreetManyTimes(names []string) ([]string, error) {
 	}
 
 	return l, nil
+}
+
+func (c *Client) MatchNameWithData(name string, t time.Duration) {
+
+	req := &greet.MatchNameWithDataRequest{
+		Name: name,
+	}
+
+	ctxWithTimout, cancel := context.WithTimeout(context.Background(), t)
+	defer cancel()
+
+	res, err := c.service.MatchNameWithData(ctxWithTimout, req)
+
+	errStatus, _ := status.FromError(err)
+
+	if errStatus.Code() == codes.NotFound {
+		fmt.Println("Nie udało się coś znaleść resourca")
+	}
+
+	if errStatus.Code() == codes.Canceled {
+		fmt.Println("Serwer nie ogarnał  w tri miga")
+	}
+
+	if err != nil {
+		log.Println(err)
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println(res.GetAge())
 }

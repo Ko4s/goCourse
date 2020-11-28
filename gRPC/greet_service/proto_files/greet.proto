@@ -21,9 +21,19 @@ message GreetManyResponse {
   string result = 1;
 }
 
+message MatchNameWithDataRequest {
+  string name = 1;
+}
+
+message MatchNameWithDataResponse {
+  int32 age = 1;
+  string petName = 2;
+}
+
 service GreetService {
     rpc SayHello(GreetRequest) returns (GreetResponse);
     rpc SayManyHello(GreetManyRequest) returns(stream GreetManyResponse);
     rpc GreetManyUsers(stream GreetRequest) returns (GreetResponse);
     rpc GreetManyTimes(stream GreetRequest) returns (stream GreetResponse);
+    rpc MatchNameWithData(MatchNameWithDataRequest) returns (MatchNameWithDataResponse);
 } 

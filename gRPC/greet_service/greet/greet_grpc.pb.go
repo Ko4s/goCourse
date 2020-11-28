@@ -21,6 +21,7 @@ type GreetServiceClient interface {
 	SayManyHello(ctx context.Context, in *GreetManyRequest, opts ...grpc.CallOption) (GreetService_SayManyHelloClient, error)
 	GreetManyUsers(ctx context.Context, opts ...grpc.CallOption) (GreetService_GreetManyUsersClient, error)
 	GreetManyTimes(ctx context.Context, opts ...grpc.CallOption) (GreetService_GreetManyTimesClient, error)
+	MatchNameWithData(ctx context.Context, in *MatchNameWithDataRequest, opts ...grpc.CallOption) (*MatchNameWithDataResponse, error)
 }
 
 type greetServiceClient struct {
@@ -137,6 +138,15 @@ func (x *greetServiceGreetManyTimesClient) Recv() (*GreetResponse, error) {
 	return m, nil
 }
 
+func (c *greetServiceClient) MatchNameWithData(ctx context.Context, in *MatchNameWithDataRequest, opts ...grpc.CallOption) (*MatchNameWithDataResponse, error) {
+	out := new(MatchNameWithDataResponse)
+	err := c.cc.Invoke(ctx, "/greet.GreetService/MatchNameWithData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GreetServiceServer is the server API for GreetService service.
 // All implementations must embed UnimplementedGreetServiceServer
 // for forward compatibility
@@ -145,6 +155,7 @@ type GreetServiceServer interface {
 	SayManyHello(*GreetManyRequest, GreetService_SayManyHelloServer) error
 	GreetManyUsers(GreetService_GreetManyUsersServer) error
 	GreetManyTimes(GreetService_GreetManyTimesServer) error
+	MatchNameWithData(context.Context, *MatchNameWithDataRequest) (*MatchNameWithDataResponse, error)
 	mustEmbedUnimplementedGreetServiceServer()
 }
 
@@ -163,6 +174,9 @@ func (UnimplementedGreetServiceServer) GreetManyUsers(GreetService_GreetManyUser
 }
 func (UnimplementedGreetServiceServer) GreetManyTimes(GreetService_GreetManyTimesServer) error {
 	return status.Errorf(codes.Unimplemented, "method GreetManyTimes not implemented")
+}
+func (UnimplementedGreetServiceServer) MatchNameWithData(context.Context, *MatchNameWithDataRequest) (*MatchNameWithDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MatchNameWithData not implemented")
 }
 func (UnimplementedGreetServiceServer) mustEmbedUnimplementedGreetServiceServer() {}
 
@@ -268,6 +282,24 @@ func (x *greetServiceGreetManyTimesServer) Recv() (*GreetRequest, error) {
 	return m, nil
 }
 
+func _GreetService_MatchNameWithData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MatchNameWithDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GreetServiceServer).MatchNameWithData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/greet.GreetService/MatchNameWithData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GreetServiceServer).MatchNameWithData(ctx, req.(*MatchNameWithDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _GreetService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "greet.GreetService",
 	HandlerType: (*GreetServiceServer)(nil),
@@ -275,6 +307,10 @@ var _GreetService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SayHello",
 			Handler:    _GreetService_SayHello_Handler,
+		},
+		{
+			MethodName: "MatchNameWithData",
+			Handler:    _GreetService_MatchNameWithData_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github/Ko4s/greet_service/client/client"
+	"time"
 )
 
 func main() {
@@ -11,8 +11,5 @@ func main() {
 
 	c := client.NewClient(address)
 
-	names := []string{"Piotrek", "Szymon", "Aneta", "Olga"}
-	r, err := c.GreetManyTimes(names)
-	fmt.Println(err)
-	fmt.Println(r)
+	c.MatchNameWithData("Piotrek", time.Second*7)
 }

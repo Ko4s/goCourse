@@ -4,18 +4,23 @@ import (
 	"context"
 	"fmt"
 	"github/Ko4s/greet_service/greet"
+	"github/Ko4s/greet_service/server/repository"
 	"io"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 //Service a gRPC service
 type GreetService struct {
+	repo repository.Repository
 	greet.UnimplementedGreetServiceServer
 }
 
-func NewGreetService() *GreetService {
-	return &GreetService{}
+func NewGreetService(repo repository.Repository) *GreetService {
+	return &GreetService{repo: repo}
 }
 
 //SayHello method of rpc service
@@ -110,4 +115,28 @@ func (s *GreetService) GreetManyTimes(serverStream greet.GreetService_GreetManyT
 	}
 
 	return nil
+}
+
+//MatchNameWithData Example of error statuses in gRPC
+func (s *GreetService) MatchNameWithData(ctx context.Context, req *greet.MatchNameWithDataRequest) (*greet.MatchNameWithDataResponse, error) {
+
+	name := req.GetName()
+	//timeout ktorym będę blokował funckje
+
+	for i := 0; i < 10; i++ {
+
+		if ctx.Err() == context.Canceled {
+			return nil, status.Error(codes.Canceled, ":(")
+		}
+
+		fmt.Println(i)
+		time.Sleep(time.Second)
+	}
+
+	res := &greet.MatchNameWithDataResponse{
+		Age:     17,
+		PetName: name,
+	}
+
+	return res, nil
 }
