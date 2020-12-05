@@ -20,6 +20,7 @@ type GreetClient interface {
 	SayHello(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
 	GreetManyUsers(ctx context.Context, opts ...grpc.CallOption) (Greet_GreetManyUsersClient, error)
 	GreetManyTimes(ctx context.Context, in *GreetManyTimesRequest, opts ...grpc.CallOption) (Greet_GreetManyTimesClient, error)
+	GreetEverynone(ctx context.Context, opts ...grpc.CallOption) (Greet_GreetEverynoneClient, error)
 }
 
 type greetClient struct {
@@ -105,6 +106,37 @@ func (x *greetGreetManyTimesClient) Recv() (*GreetManyTimesResponse, error) {
 	return m, nil
 }
 
+func (c *greetClient) GreetEverynone(ctx context.Context, opts ...grpc.CallOption) (Greet_GreetEverynoneClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Greet_serviceDesc.Streams[2], "/greet.Greet/GreetEverynone", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &greetGreetEverynoneClient{stream}
+	return x, nil
+}
+
+type Greet_GreetEverynoneClient interface {
+	Send(*GreeEveryoneRequest) error
+	Recv() (*GreetEveryoneResponse, error)
+	grpc.ClientStream
+}
+
+type greetGreetEverynoneClient struct {
+	grpc.ClientStream
+}
+
+func (x *greetGreetEverynoneClient) Send(m *GreeEveryoneRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *greetGreetEverynoneClient) Recv() (*GreetEveryoneResponse, error) {
+	m := new(GreetEveryoneResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GreetServer is the server API for Greet service.
 // All implementations must embed UnimplementedGreetServer
 // for forward compatibility
@@ -112,6 +144,7 @@ type GreetServer interface {
 	SayHello(context.Context, *GreetRequest) (*GreetResponse, error)
 	GreetManyUsers(Greet_GreetManyUsersServer) error
 	GreetManyTimes(*GreetManyTimesRequest, Greet_GreetManyTimesServer) error
+	GreetEverynone(Greet_GreetEverynoneServer) error
 	mustEmbedUnimplementedGreetServer()
 }
 
@@ -127,6 +160,9 @@ func (UnimplementedGreetServer) GreetManyUsers(Greet_GreetManyUsersServer) error
 }
 func (UnimplementedGreetServer) GreetManyTimes(*GreetManyTimesRequest, Greet_GreetManyTimesServer) error {
 	return status.Errorf(codes.Unimplemented, "method GreetManyTimes not implemented")
+}
+func (UnimplementedGreetServer) GreetEverynone(Greet_GreetEverynoneServer) error {
+	return status.Errorf(codes.Unimplemented, "method GreetEverynone not implemented")
 }
 func (UnimplementedGreetServer) mustEmbedUnimplementedGreetServer() {}
 
@@ -206,6 +242,32 @@ func (x *greetGreetManyTimesServer) Send(m *GreetManyTimesResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Greet_GreetEverynone_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GreetServer).GreetEverynone(&greetGreetEverynoneServer{stream})
+}
+
+type Greet_GreetEverynoneServer interface {
+	Send(*GreetEveryoneResponse) error
+	Recv() (*GreeEveryoneRequest, error)
+	grpc.ServerStream
+}
+
+type greetGreetEverynoneServer struct {
+	grpc.ServerStream
+}
+
+func (x *greetGreetEverynoneServer) Send(m *GreetEveryoneResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *greetGreetEverynoneServer) Recv() (*GreeEveryoneRequest, error) {
+	m := new(GreeEveryoneRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _Greet_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "greet.Greet",
 	HandlerType: (*GreetServer)(nil),
@@ -225,6 +287,12 @@ var _Greet_serviceDesc = grpc.ServiceDesc{
 			StreamName:    "GreetManyTimes",
 			Handler:       _Greet_GreetManyTimes_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "GreetEverynone",
+			Handler:       _Greet_GreetEverynone_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "proto_files/greet.proto",

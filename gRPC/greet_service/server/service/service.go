@@ -2,11 +2,15 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github/Ko4s/greet_service/greet"
 	"io"
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 //GreetService implementation of GreetServer grpc interface
@@ -74,6 +78,26 @@ func (s *GreetService) GreetManyTimes(req *greet.GreetManyTimesRequest, stream g
 		}
 
 		time.Sleep(time.Second)
+	}
+
+	return nil
+}
+
+// GreetEverynone is a bidriectional method for greeting multiple peapole 
+func (s *GreetService) GreetEverynone(stream greet.Greet_GreetEverynoneServer) error {
+	fmt.Println("GreetEveryone was invoked")
+
+	for {
+		req, err := stream.Recv()
+
+		//Kończy nam działanie pętli
+		if err == io.EOF {
+			break;
+		}
+
+		if err != nil {
+			return status.Errorf(codes.Internal, "Something went wrong %v", err)
+		}
 	}
 
 	return nil

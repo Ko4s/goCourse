@@ -29,8 +29,17 @@ message GreetManyTimesResponse {
   string msg = 1;
 }
 
+message GreeEveryoneRequest {
+   string name = 1;
+}
+
+message GreetEveryoneResponse {
+  string result = 1;
+}
+
 service Greet {
   rpc SayHello(GreetRequest) returns(GreetResponse);
   rpc GreetManyUsers(stream GreetManyUsersRequest) returns(GreetManyUsersResponse);
   rpc GreetManyTimes(GreetManyTimesRequest) returns(stream GreetManyTimesResponse);
+  rpc GreetEverynone(stream GreeEveryoneRequest) returns (stream GreetEveryoneResponse);
 }
